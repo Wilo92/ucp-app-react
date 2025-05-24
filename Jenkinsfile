@@ -1,45 +1,37 @@
 pipeline {
-  agent any
-  tools {
-    nodejs 'Node_24' // Nombre definido en Global Tool Configuration
-  }
-  stages {
-    // Etapa 1: Checkout del código desde GitHub
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://github.com/Wilo92/ucp-app-react.git'
-      }
+    agent any
+    tools {
+        nodejs 'Node_24' // Configurado en Global Tools
     }
-
-    // Etapa 2: Instalar dependencias y build del proyecto
-    stage('Build') {
-      steps {
-        sh 'npm install'
-        sh 'npm run build' // Ejecuta el build de React
-      }
-    }
-
-    // Etapa 3: Ejecutar pruebas unitarias
-    stage('Unit Tests') {
-      steps {
-        sh 'npm test -- --watchAll=false --silent > test-output.txt || true' // Ejecuta pruebas sin modo interactivo
-        sh 'cat test-output.txt' // Muestra el reporte simple en la consola
-      }
-      post {
-        always {
-          archiveArtifacts artifacts: 'test-output.txt', allowEmptyArchive: true
+    stages {
+        // Etapa 1: Checkout
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/amartinezh/ucp-app-react.git'
+            }
         }
-      }
-    }
-  }
 
-  // Post-actions (opcional)
-  post {
-    success {
-      echo '¡Pipeline ejecutado con éxito!'
+        // Etapa 2: Build
+        stage('Build') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+            }
+        }
+
+        // Etapa 3: Pruebas Paralelizadas
+        stage('Pruebas en Paralelo') {
+            parallel {
+                // Pruebas en Chrome
+                stage('Pruebas Chrome') {
+                    steps {
+                        // Aquí irían los comandos específicos para ejecutar las pruebas en Chrome
+                    }
+                }
+
+                // Puedes agregar otras pruebas paralelas aquí, por ejemplo:
+                // stage('Pruebas Firefox') { steps { ... } }
+            }
+        }
     }
-    failure {
-      echo 'Pipeline fallido. Revisar logs.'
-    }
-  }
 }
